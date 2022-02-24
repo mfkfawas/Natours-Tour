@@ -17,7 +17,7 @@ export const login = async (email, password) => {
         password,
       },
     })
-    console.log(res.data)
+    // console.log(res.data)
 
     // let response = await fetch('http://127.0.0.1:3000/api/v1/users/login', {
     //   method: 'POST',
