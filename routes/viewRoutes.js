@@ -24,4 +24,11 @@ router.get('/login', authController.isLoggedIn, viewController.getLoginForm)
 // we dont want to add isLoggedIn here coz protect middleware do isLoggedIn's duty.
 router.get('/me', authController.protect, viewController.getAccount)
 
+//Chapter 195
+router.post(
+  '/submit-user-data',
+  authController.protect,
+  viewController.updateUserData
+)
+
 module.exports = router
