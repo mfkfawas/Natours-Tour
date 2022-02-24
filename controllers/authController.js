@@ -6,6 +6,7 @@ const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const sendEmail = require('../utils/email')
+const { globalAgent } = require('http')
 
 const signToken = function (id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,24 +15,26 @@ const signToken = function (id) {
 }
 
 const createAndSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id)
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  }
+  global.token = signToken(user._id)
 
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
+  // const cookieOptions = {
+  // expires: new Date(
+  // Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+  // ),
+  // httpOnly: true,
+  // sameSite: 'None',
+  // secure: true,
+  // }
+  // console.log(token)
+  // if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
 
-  res.cookie('jwt', token, cookieOptions)
+  // res.cookie('jwt', token, cookieOptions)
 
-  // Remove password from output(we are not save()ing, so it will not be persisted to DB.)
   user.password = undefined
 
   res.status(statusCode).json({
-    status: 'success',
-    token,
+    success: true,
+    token: global.token,
     data: {
       user,
     },
@@ -70,6 +73,18 @@ exports.login = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res)
 })
 
+// Chapter 192
+exports.logout = catchAsync(async (req, res, next) => {
+  global.token = 'SOmeDummyText'
+
+  // res.cookie('jwt', 'someDummyText', {
+  //   expires: new Date(Date.now + 10 * 1000),
+  //   httpOnly: true,
+  //   //we donot need to set it as secure coz here no sensitive data.
+  // })
+  res.status(200).json({ status: 'success' })
+})
+
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token & check if its there.
   let token
@@ -79,8 +94,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1]
+    // Chapter 189 - now we can authenticate users based on the tokens sent via cookies.
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt
   }
-
   if (!token)
     return next(
       new AppError('You are not logged in!!! Please login to get access', 401)
@@ -112,8 +129,64 @@ exports.protect = catchAsync(async (req, res, next) => {
   //if code can make to all to the end of this code, only then next will be executed. i.e we go to the next
   //route handler, which means to grant access to that protected route.
   req.user = currentUser
+  res.locals.user = currentUser
   next()
 })
+
+// Chapter 190
+// This middleware is only for rendered pages. so the goal is not to protect any routes.
+// so there will never be error in this middleware.
+
+// If any of this fn's step is confusing, look above protect fn.
+
+// This fn is not wrapped in catchAsync coz when user logout the site reload(look login.js)
+// so when site reload this middleware is exec, if wrapped in catchAsync() then when verifying
+// token(in this fn) it will be malformed and pass to our global error handler. That should not
+// happen cz this fn is only to render the name & photo of user in header if logged in, else
+// render login & signup buttons.
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    let token
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1]
+
+      // Chapter 189 - now we can authenticate users based on the tokens sent via cookies.
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt
+    }
+
+    // 1) verify token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
+    // console.log(decoded)
+
+    // 2) Check if user still exists
+    const currentUser = await User.findById(decoded.id)
+    if (!currentUser) {
+      return next()
+    }
+
+    // 3) Check if user changed password after the token was issued
+    if (await currentUser.changedPasswordAfterTokenIssued(decoded.iat)) {
+      return next()
+    }
+    // console.log(currentUser)
+
+    // if THERE IS A LOGGED IN USER(Then we can give access to our templates)
+    // pug template get access to the variable that we set with res.locals(imp)
+    // Now inside of the template there will be a variable called user.
+    res.locals.user = currentUser
+    return next()
+  } catch (err) {
+    // if there is no logged in user.
+    return next()
+  }
+
+  next()
+}
 
 //Ussually we cant pass arguments to middleware fn, but here we really want to, we want to pass in the roles,
 // who are allowed to access the resource.

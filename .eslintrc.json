@@ -8,6 +8,11 @@
         "endOfLine": "auto"
       }
     ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module",
+      "allowImportExportEverywhere": true
+    },
     "spaced-comment": "off",
     "no-console": "warn",
     "consistent-return": "off",

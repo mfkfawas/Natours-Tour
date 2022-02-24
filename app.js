@@ -1,4 +1,5 @@
 //Everything related to the app's(express) configuration in one file.
+const path = require('path')
 const express = require('express')
 const morgan = require('morgan')
 const rateLimit = require('express-rate-limit')
@@ -6,6 +7,8 @@ const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
+const cookieParser = require('cookie-parser')
+const cors = require('cors')
 
 const AppError = require('./utils/appError')
 const globalErrorHandler = require('./controllers/errorController')
@@ -13,12 +16,34 @@ const globalErrorHandler = require('./controllers/errorController')
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
+const viewRouter = require('./routes/viewRoutes')
 
 const app = express()
 
+//defining our view engine
+app.set('view engine', 'pug')
+app.set('views', path.join(__dirname, 'views'))
+
 // 1) GLOBAL MIDDLEWARES
+//Serving Static files
+app.use(express.static(path.join(__dirname, 'public')))
+
+// stack over flow(not in jonas code)(Access to fetch at 'http://127.0.0.1:3000/api/v1/users/login'
+// from origin 'http://localhost:3000' has been blocked by CORS policy: Response
+// to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin'
+// header is present on the requested resource. If an opaque response serves your needs, set
+// the request's mode to 'no-cors' to fetch the resource with CORS disabled.)
+const corsOptions = {
+  credentials: true, //access-control-allow-credentials:true
+  origin: 'http://localhost:3000',
+  optionSuccessStatus: 200,
+}
+app.use(cors(corsOptions)) // Use this after the variable declaration
+
 //Set security HTTP headers
 app.use(helmet())
+
+// Apply middleware before routes
 
 //Development logging
 if (process.env.NODE_ENV === 'production') app.use(morgan('dev'))
@@ -33,6 +58,8 @@ app.use('/api', limiter)
 
 //Body Parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }))
+app.use(express.urlencoded({ extended: true, limit: '10kb' }))
+app.use(cookieParser()) // Chapter 189 - parse cookies to req.cookies
 
 //Data sanitization against noSQL query injections.
 app.use(mongoSanitize())
@@ -54,21 +81,20 @@ app.use(
   })
 )
 
-//Serving Static files
-app.use(express.static(`${__dirname}/public`))
-
 // Creating our own middleware
 // app.use((req, res, next) => {
 //   console.log('Hello from middleware✌️✌️✌️')
 //   next()
 // })
 app.use((req, res, next) => {
+  // console.log(req.cookies)
   req.requestTime = new Date().toISOString()
   next()
 })
 
 // 3) ROUTES
-//mounting the router.
+
+app.use('/', viewRouter)
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/reviews', reviewRouter)
