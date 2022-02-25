@@ -5,7 +5,7 @@ const AppError = require('../utils/appError')
 const catchAsync = require('../utils/catchAsync')
 const factory = require('./handlerFactory')
 
-//______________________________________________MULTER_____________________________________________________________
+//______________________________________________MULTER(user photo upload)_____________________________________________________________
 //Chapter 200
 const multerStorage = multer.diskStorage({
   destination: (req, file, callback) => {
@@ -34,7 +34,8 @@ const upload = multer({
   fileFilter: multerFilter,
 })
 
-// 'photo' is the fieldname(of form).
+// 'photo' is the fieldname(of form). So if the user updated photo on 'photo' on frontend then only this line of
+// code is exec.
 exports.uploadUserPhoto = upload.single('photo')
 //____________________________________________________________________________________________________________
 
@@ -70,6 +71,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // 2) we want to filter the body and mke sure it only contain name & email.
   const filteredBody = filterObj(req.body, 'name', 'email')
+
+  //filteredBody should contain the data to be uploaded. req.file will only exist if the req is passed
+  //through multer middleware(i.e if user uploaded new photo)
+  if (req.file) filteredBody.photo = req.file.filename
 
   // 3)--------------------------------Update user document--------------------------------------------------------------
   //We r not passing req.body to update, coz we donot want to update everything that's in the body. For eg if
