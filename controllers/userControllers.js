@@ -1,7 +1,42 @@
+const multer = require('multer')
+
 const User = require('../models/userModel')
 const AppError = require('../utils/appError')
 const catchAsync = require('../utils/catchAsync')
 const factory = require('./handlerFactory')
+
+//______________________________________________MULTER_____________________________________________________________
+//Chapter 200
+const multerStorage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, 'public/img/users')
+  },
+  filename: (req, file, callback) => {
+    const extension = file.mimetype.split('/')[1]
+    //2nd arg is the unique filename of our uploading photo.
+    callback(null, `user-${req.user.id}-${Date.now()}.${extension}`)
+  },
+})
+
+//Chapter 200
+// This fn's goal is to test if the uploaded file is an image. If so, we pass true into the
+// the callback function, and if its not we pass false into the callback function along with an err.
+const multerFilter = (req, file, callback) => {
+  if (file.mimetype.startsWith('image/')) {
+    callback(null, true)
+  } else {
+    callback(new AppError('Not an image! Please upload only images.'))
+  }
+}
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+})
+
+// 'photo' is the fieldname(of form).
+exports.uploadUserPhoto = upload.single('photo')
+//____________________________________________________________________________________________________________
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {}

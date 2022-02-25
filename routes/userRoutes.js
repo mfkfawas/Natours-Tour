@@ -1,10 +1,8 @@
 const express = require('express')
-const multer = require('multer')
 
 const userController = require('../controllers/userControllers')
 const authController = require('../controllers/authController')
 
-const upload = multer({ dest: 'public/img/users' })
 const router = express.Router()
 
 //Public routes
@@ -27,7 +25,11 @@ router.get('/me', userController.getMe, userController.getUser)
 
 //single means only want to update single image, into single we pass the name of the field(in form)
 //that is going to hold the image to upload. upload.single() takes the img & copy it to the destination folder.
-router.patch('/updateMe', upload.single('photo'), userController.updateMe)
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.updateMe
+)
 router.delete('/deleteMe', userController.deleteMe)
 
 //Only admins can access all the routes after this middleware.
