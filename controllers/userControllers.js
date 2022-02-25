@@ -1,4 +1,5 @@
 const multer = require('multer')
+const sharp = require('sharp') //image processing library for nodejs
 
 const User = require('../models/userModel')
 const AppError = require('../utils/appError')
@@ -7,16 +8,21 @@ const factory = require('./handlerFactory')
 
 //______________________________________________MULTER(user photo upload)_____________________________________________________________
 //Chapter 200
-const multerStorage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, 'public/img/users')
-  },
-  filename: (req, file, callback) => {
-    const extension = file.mimetype.split('/')[1]
-    //2nd arg is the unique filename of our uploading photo.
-    callback(null, `user-${req.user.id}-${Date.now()}.${extension}`)
-  },
-})
+//This will store image to disk
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, callback) => {
+//     callback(null, 'public/img/users')
+//   },
+//   filename: (req, file, callback) => {
+//     const extension = file.mimetype.split('/')[1]
+// 2nd arg is the unique filename of our uploading photo.
+//     callback(null, `user-${req.user.id}-${Date.now()}.${extension}`)
+//   },
+// })
+
+//Chapter 202
+//now image will be stored as buffer & not to disk. The buffer will be available at req.file.buffer
+const multerStorage = multer.memoryStorage()
 
 //Chapter 200
 // This fn's goal is to test if the uploaded file is an image. If so, we pass true into the
@@ -38,6 +44,28 @@ const upload = multer({
 // code is exec.
 exports.uploadUserPhoto = upload.single('photo')
 //____________________________________________________________________________________________________________
+
+// Chapter 202
+exports.resizeUserPhoto = (req, res, next) => {
+  // At this point we already have the file on our req, if there was an upload. If no upload then we dont want to
+  // do anything.
+  if (!req.file) return next()
+
+  //.jpeg coz we convert the file to jpeg(look down)
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`
+
+  //when do img processing like this right after uploading the file then its always best to not even save the file
+  //to the disk, but instead save it to m/y.(look to multerStorage)
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    //compressing with quality 90% of uploaded file.
+    .jpeg({ quality: 90 })
+    //Finally, we want to save it to disk
+    .toFile(`public/img/users/${req.file.filename}`)
+
+  next()
+}
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {}
