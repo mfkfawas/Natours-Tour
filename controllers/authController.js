@@ -15,7 +15,8 @@ const signToken = function (id) {
 }
 
 const createAndSendToken = (user, statusCode, res) => {
-  global.token = signToken(user._id)
+  const token = signToken(user._id)
+  global.token = token
 
   // const cookieOptions = {
   // expires: new Date(
@@ -34,7 +35,7 @@ const createAndSendToken = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token: global.token,
+    token,
     data: {
       user,
     },
