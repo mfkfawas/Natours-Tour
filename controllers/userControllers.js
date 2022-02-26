@@ -40,7 +40,7 @@ const upload = multer({
   fileFilter: multerFilter,
 })
 
-// 'photo' is the fieldname(of form). So if the user updated photo on 'photo' on frontend then only this line of
+// 'photo' is the fieldname(in DB). So if the user updated photo on 'photo' on frontend then only this line of
 // code is exec.
 exports.uploadUserPhoto = upload.single('photo')
 //____________________________________________________________________________________________________________

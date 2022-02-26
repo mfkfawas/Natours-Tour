@@ -1,7 +1,48 @@
+const multer = require('multer')
+const sharp = require('sharp')
+
 const Tour = require('../models/tourModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const factory = require('./handlerFactory')
+
+const multerStorage = multer.memoryStorage()
+
+const multerFilter = (req, file, callback) => {
+  if (file.mimetype.startsWith('image/')) {
+    callback(null, true)
+  } else {
+    callback(new AppError('Not an image! Please upload only images.'))
+  }
+}
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+})
+
+//Chapter 204
+//Here we have multiple files, one of them have one image & other one have 3 images to be uploaded as max.
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+])
+
+//Chapter 204
+// If Instead we have only one field which accepts multiple images/multiple files at the same time:
+// 1st arg - fieldname in DB 2nd - maxcount.
+// upload.array('images', 5)
+
+//Chapter 204
+//if we have one only file to upload:
+// upload.single('field_name_of_DB')
+
+//Chapter 204
+exports.resizeTourImages = (req, res, next) => {
+  //Incase if we have multiple files multer parses its to req.files
+  console.log(req.files)
+  next()
+}
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5'
