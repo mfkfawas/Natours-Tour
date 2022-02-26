@@ -34,9 +34,16 @@ if (logoutBtn) logoutBtn.addEventListener('click', logout)
 if (userDataForm) {
   userDataForm.addEventListener('submit', (e) => {
     e.preventDefault()
-    const name = document.getElementById('name').value
-    const email = document.getElementById('email').value
-    updateSettings({ name, email }, 'data')
+
+    //Chapter 203(Here we are creating a multi-part form data)
+    const form = new FormData()
+    form.append('name', document.getElementById('name').value)
+    form.append('email', document.getElementById('email').value)
+    //.files return an array, since there is only one...
+    form.append('photo', document.getElementById('photo').files[0])
+
+    //our AJAX call using axios will auto recognize 'form' as object.
+    updateSettings(form, 'data')
   })
 }
 
