@@ -38,11 +38,45 @@ exports.uploadTourImages = upload.fields([
 // upload.single('field_name_of_DB')
 
 //Chapter 204
-exports.resizeTourImages = (req, res, next) => {
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
   //Incase if we have multiple files multer parses its to req.files
   console.log(req.files)
+
+  if (!req.files.imageCover || !req.files.images) return next()
+
+  // 1) Cover Image
+  //The next middleware(updateTour) picks up whatever on the req.body to update the current tour doc.
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    //compressing with quality 90% of uploaded file.
+    .jpeg({ quality: 90 })
+    //Finally, we want to save it to disk
+    .toFile(`public/img/tours/${req.body.imageCover}`)
+
+  // 2) Images
+  req.body.images = []
+
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpeg`
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        //compressing with quality 90% of uploaded file.
+        .jpeg({ quality: 90 })
+        //Finally, we want to save it to disk
+        .toFile(`public/img/tours/${filename}`)
+
+      req.body.images.push(filename)
+    })
+  )
+
   next()
-}
+})
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5'
