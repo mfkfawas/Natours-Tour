@@ -40,13 +40,13 @@ const upload = multer({
   fileFilter: multerFilter,
 })
 
-// 'photo' is the fieldname(in DB). So if the user updated photo on 'photo' on frontend then only this line of
+// 'photo' is the fieldname(in form(req)). So if the user updated photo on 'photo' on frontend then only this line of
 // code is exec.
 exports.uploadUserPhoto = upload.single('photo')
 //____________________________________________________________________________________________________________
 
 // Chapter 202
-exports.resizeUserPhoto = (req, res, next) => {
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   // At this point we already have the file on our req, if there was an upload. If no upload then we dont want to
   // do anything.
   if (!req.file) return next()
@@ -56,7 +56,7 @@ exports.resizeUserPhoto = (req, res, next) => {
 
   //when do img processing like this right after uploading the file then its always best to not even save the file
   //to the disk, but instead save it to m/y.(look to multerStorage)
-  sharp(req.file.buffer)
+  await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     //compressing with quality 90% of uploaded file.
@@ -65,7 +65,7 @@ exports.resizeUserPhoto = (req, res, next) => {
     .toFile(`public/img/users/${req.file.filename}`)
 
   next()
-}
+})
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {}
