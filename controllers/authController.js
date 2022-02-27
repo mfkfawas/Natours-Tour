@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
-const sendEmail = require('../utils/email')
+const Email = require('../utils/email')
 const { globalAgent } = require('http')
 
 const signToken = function (id) {
@@ -51,6 +51,10 @@ exports.signUp = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   })
+
+  const url = `${req.protocol}://${req.get('host')}/me`
+  console.log(url)
+  await new Email(newUser, url).sendWelcome()
 
   createAndSendToken(newUser, 201, res)
 })
@@ -232,11 +236,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   //the passwordResetToken and passwordResetExpires. So right now it is not enough to catch the error and then
   //send it down to our global error handler. So we use a try-catch block.
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your Password Reset Token(Valid for 10min)',
-      message,
-    })
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'Your Password Reset Token(Valid for 10min)',
+    //   message,
+    // })
 
     res.status(200).json({
       status: 'success',
