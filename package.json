@@ -27,6 +27,7 @@
     "express-rate-limit": "^6.2.0",
     "helmet": "^3.16.0",
     "hpp": "^0.2.3",
+    "html-to-text": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
     "local-storage": "^2.0.0",
     "mongoose": "^5.13.14",
