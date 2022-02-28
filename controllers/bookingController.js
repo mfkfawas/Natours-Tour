@@ -50,6 +50,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   })
 })
 
+//Chapter 214
 //fn that will create the new booking in the DB.
 //ITs called createBookingCheckout cZ later we will also have createBooking() which will then be accessible from our bookings API
 exports.createBookingCheckout = catchAsync(async (req, res, next) => {
