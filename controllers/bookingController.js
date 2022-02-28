@@ -1,3 +1,4 @@
+//In backend for stripe: we want to download stripe package, require('stripe') gives a fn, so we passed our key to that fn.
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const Tour = require('../models/tourModel')
@@ -33,7 +34,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
         //And so this is another things that we can only really do once the website is deployed.
         images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
         amount: tour.price * 100, //expected in cents
-        currency: 'usd',
+        currency: 'inr',
         quantity: 1, //1 tour in this case.
       },
     ],
