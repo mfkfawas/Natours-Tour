@@ -2,6 +2,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const Tour = require('../models/tourModel')
+const Booking = require('../models/bookingModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const factory = require('./handlerFactory')
@@ -15,7 +16,9 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     // INFORMATION ABOUT THE SESSION
     payment_method_types: ['card'],
     //url that will be callied as soon as a credit card has been succesfully charged.
-    success_url: `${req.protocol}://${req.get('host')}/`,
+    success_url: `${req.protocol}://${req.get('host')}/?tour=${
+      req.params.tourId
+    }&user=${req.user.id}&price=${tour.price}`,
     //url tha will be called if user cancels the payment.
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
@@ -45,4 +48,18 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     status: 'success',
     session,
   })
+})
+
+//fn that will create the new booking in the DB.
+//ITs called createBookingCheckout cZ later we will also have createBooking() which will then be accessible from our bookings API
+exports.createBookingCheckout = catchAsync(async (req, res, next) => {
+  const { tour, user, price } = req.query
+
+  if (!tour && !user && !price) return next()
+
+  await Booking.create({ tour, user, price })
+
+  //redirect create a new req to the new url that we passed.
+  //here we remove the queryString inorder to not see the url by the user.
+  res.redirect(req.originalUrl.split('?')[0])
 })

@@ -26,6 +26,10 @@ html
     //- script(script-src-elem='https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.0/axios.min.js' crossorigin='anonymous')
     //- script(src='/js/mapbox.js')
     //- script(src='/js/login.js')
+
+    //- This will expose a stripe obj to the global scope.
+    script(src='https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch')     
+    script(src='https://js.stripe.com/v3/')
     script(src='/js/bundle.js')
 
           
