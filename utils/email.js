@@ -29,6 +29,7 @@ module.exports = class Email {
       })
     }
 
+    //development mode
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -44,7 +45,7 @@ module.exports = class Email {
     // 1) Render HTML for email based on a pug template
     //we want to create the HTML out of the template so that we can send that HTML as the email.
     //This will take in the file and then render the pug code into real HTML.
-    //2nd arg is data to be rendered.
+    //2nd arg is data to be passed to the template.
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
       url: this.url,
