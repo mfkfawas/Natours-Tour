@@ -82,7 +82,7 @@ app.use('/api', limiter)
 //However we need to parse the body in raw format.
 app.use(
   '/webhook-checkout',
-  expresss.raw({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   bookingController.webhookCheckout
 )
 
