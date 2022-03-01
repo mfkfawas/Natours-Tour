@@ -18,6 +18,7 @@ const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
 const bookingRouter = require('./routes/bookingRoutes')
+const bookingController = require('./controllers/bookingController')
 const viewRouter = require('./routes/viewRoutes')
 
 const app = express()
@@ -72,6 +73,18 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in one hour!!!',
 })
 app.use('/api', limiter)
+
+//Chapter 227
+//we define this here instead of doing it in the bookingRouter, The reason is that in this handler fn(webhookCheckout)
+//when we recieve the the body from Stripe, the Stripe fn we're then gonna use to actually read the body needs
+//this body in a row form, as a string & not as a JSON. If this body hits the next middleware (express.json()) then the
+//body will be parsed and converted to JSON. Then this route handler will not work.
+//However we need to parse the body in raw format.
+app.use(
+  '/webhook-checkout',
+  expresss.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+)
 
 //Body Parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }))
