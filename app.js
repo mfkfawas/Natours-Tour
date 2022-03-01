@@ -9,6 +9,7 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const compression = require('compression')
 
 const AppError = require('./utils/appError')
 const globalErrorHandler = require('./controllers/errorController')
@@ -87,6 +88,10 @@ app.use(
 //   console.log('Hello from middleware✌️✌️✌️')
 //   next()
 // })
+
+//This only gonna compress text(HTML/JSON) & not images in responses.
+app.use(compression())
+
 app.use((req, res, next) => {
   // console.log(req.cookies)
   req.requestTime = new Date().toISOString()

@@ -11,7 +11,8 @@ export const login = async (email, password) => {
       method: 'POST',
       withCredentials: true,
       // headers,
-      url: 'http://127.0.0.1:3000/api/v1/users/login',
+      //This is relative URL, since the API and the website are hosted on the same server this works.
+      url: '/api/v1/users/login',
       data: {
         email,
         password,
@@ -62,9 +63,8 @@ export const logout = async () => {
 
     const res = await axios({
       method: 'GET',
-      url: 'http://127.0.0.1:3000/api/v1/users/logout',
+      url: '/api/v1/users/logout',
     })
-    console.log(res.data)
 
     if (res.data.status === 'success') {
       //true - reload from server, not from browser cache.

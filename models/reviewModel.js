@@ -66,7 +66,6 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       },
     },
   ])
-  console.log(stats)
 
   //we wrapped this if over await bcz otherwise if the last review of a corr tour is deleted, the $match stage would
   //not then match any doc & the else is exec.(In else block we set the default ratingsAverage & ratingsQuantity to 0
