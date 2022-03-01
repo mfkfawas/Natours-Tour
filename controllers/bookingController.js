@@ -13,22 +13,6 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId)
 
   // 2) Create checkout session
-  const customer = await stripe.customers.create({
-    name: 'Jenny Rosen',
-    address: {
-      line1: '510 Townsend St',
-      postal_code: '98140',
-      city: 'San Francisco',
-      state: 'CA',
-      country: 'US',
-    },
-  })
-
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: tour.price * 100,
-    currency: 'usd',
-    description: tour.summary,
-  })
 
   const session = await stripe.checkout.sessions.create({
     // INFORMATION ABOUT THE SESSION
@@ -53,22 +37,14 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     // INFORMATION ABOUT THE PRODUCT
     line_items: [
       {
-        quantity: 1, //1 tour in this case.
-        price_data: {
-          currency: 'usd',
-          unit_amount: tour.price * 100, //expected in cents
-          product_data: {
-            name: `${tour.name} Tour`,
-            description: tour.summary,
-            //These imgs here need to be live imgs, imgs that are hosted on internet. cz stripe will actually upload this images to their own server.
-            //And so this is another things that we can only really do once the website is deployed.
-            images: [
-              `${req.protocol}://${req.get('host')}/img/tours/${
-                tour.imageCover
-              }`,
-            ],
-          },
-        },
+        name: `${tour.name} Tour`,
+        description: tour.summary,
+        images: [
+          `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`,
+        ],
+        amount: tour.price * 100,
+        currency: 'usd',
+        quantity: 1,
       },
     ],
   })
