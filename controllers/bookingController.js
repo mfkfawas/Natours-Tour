@@ -13,6 +13,23 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.tourId)
 
   // 2) Create checkout session
+  const customer = await stripe.customers.create({
+    name: 'Jenny Rosen',
+    address: {
+      line1: '510 Townsend St',
+      postal_code: '98140',
+      city: 'San Francisco',
+      state: 'CA',
+      country: 'US',
+    },
+  })
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: tour.price * 100,
+    currency: 'usd',
+    description: tour.summary,
+  })
+
   const session = await stripe.checkout.sessions.create({
     // INFORMATION ABOUT THE SESSION
     payment_method_types: ['card'],
