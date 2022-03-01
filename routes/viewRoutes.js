@@ -30,6 +30,8 @@ router.get('/login', authController.isLoggedIn, viewController.getLoginForm)
 // we dont want to add isLoggedIn here coz protect middleware do isLoggedIn's duty.
 router.get('/me', authController.protect, viewController.getAccount)
 
+router.get('/my-tours', authController.protect, viewController.getMyTours)
+
 //Chapter 195
 router.post(
   '/submit-user-data',
