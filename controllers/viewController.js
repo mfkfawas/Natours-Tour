@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel')
 const User = require('../models/userModel')
+const Booking = require('../models/bookingModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 
@@ -37,6 +38,24 @@ exports.getLoginForm = (req, res) => {
 exports.getAccount = (req, res) => {
   res.status(200).render('account', { title: 'Your Account' })
 }
+
+//Chapter 215
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  // 1) Find All Bookings
+  const bookings = await Booking.find({ user: req.user.id })
+
+  // 2) Find Tours with returned IDs
+  const tourIDs = bookings.map((el) => el.tour) //el.tour itself is the tourID.
+  //It will select all the tours which have an _id which is in the tourIDs array. Its great to know this handi in op,
+  //Jonas want to fo this way for us to understand both manual and populate(we done bfr).
+  const tours = await Tour.find({ _id: { $in: tourIDs } })
+
+  //we dont need new template for this coz we can reuse the 'overview' template.
+  res.status(200).render('overview', {
+    title: 'My Tours',
+    tours,
+  })
+})
 
 exports.updateUserData = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findByIdAndUpdate(
