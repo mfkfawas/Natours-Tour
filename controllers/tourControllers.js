@@ -40,7 +40,6 @@ exports.uploadTourImages = upload.fields([
 //Chapter 204
 exports.resizeTourImages = catchAsync(async (req, res, next) => {
   //Incase if we have multiple files multer parses its to req.files
-  console.log(req.files)
 
   if (!req.files.imageCover || !req.files.images) return next()
 

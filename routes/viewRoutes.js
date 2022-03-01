@@ -5,16 +5,17 @@ const bookingController = require('../controllers/bookingController')
 
 const router = express.Router()
 
-const fakeMiddleware = (req, res, next) => {
-  req.headers.authorization = `Bearer ${global.token}`
+// const fakeMiddleware = (req, res, next) => {
+//   req.headers.authorization = `Bearer ${global.token}`
 
-  // console.log(req.headers.authorization)
-  next()
-}
+// console.log(req.headers.authorization)
+//   next()
+// }
 
 // Chapter 190
 // router.use(authController.isLoggedIn)
-router.use(fakeMiddleware)
+
+// router.use(fakeMiddleware)
 
 router.get(
   '/',
