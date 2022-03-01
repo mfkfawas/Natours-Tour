@@ -79,13 +79,13 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // Chapter 192
 exports.logout = catchAsync(async (req, res, next) => {
-  global.token = 'SOmeDummyText'
+  // global.token = 'SOmeDummyText'
 
-  // res.cookie('jwt', 'someDummyText', {
-  //   expires: new Date(Date.now + 10 * 1000),
-  //   httpOnly: true,
-  //   //we donot need to set it as secure coz here no sensitive data.
-  // })
+  res.cookie('jwt', 'someDummyText', {
+    expires: new Date(Date.now + 10 * 1000),
+    httpOnly: true,
+    //we donot need to set it as secure coz here no sensitive data.
+  })
   res.status(200).json({ status: 'success' })
 })
 
