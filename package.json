@@ -2,7 +2,7 @@
   "name": "natours",
   "version": "1.0.0",
   "engines": {
-    "node": ">=16.0.0"
+    "node": "^16"
   },
   "description": "learning node, express & mongoDB",
   "main": "app.js",
