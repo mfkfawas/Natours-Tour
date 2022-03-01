@@ -31,18 +31,27 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     //lets prepare for that. So to create a new booking in our DB, we need user's ID tour's ID and the price. Here we already have access to user's
     //email(we can get users ID from that). We will also specify tours price here in a sec and so all thats missing os tour ID:
     client_reference_id: req.params.tourId,
+    mode: 'payment',
 
     // INFORMATION ABOUT THE PRODUCT
     line_items: [
       {
-        name: `${tour.name} Tour`,
-        description: tour.summary,
-        //These imgs here need to be live imgs, imgs that are hosted on internet. cz stripe will actually upload this images to their own server.
-        //And so this is another things that we can only really do once the website is deployed.
-        images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
-        amount: tour.price * 100, //expected in cents
-        currency: 'inr',
         quantity: 1, //1 tour in this case.
+        price_data: {
+          currency: 'usd',
+          unit_amount: tour.price * 100, //expected in cents
+          product_data: {
+            name: `${tour.name} Tour`,
+            description: tour.summary,
+            //These imgs here need to be live imgs, imgs that are hosted on internet. cz stripe will actually upload this images to their own server.
+            //And so this is another things that we can only really do once the website is deployed.
+            images: [
+              `${req.protocol}://${req.get('host')}/img/tours/${
+                tour.imageCover
+              }`,
+            ],
+          },
+        },
       },
     ],
   })
@@ -74,8 +83,8 @@ const createBookingCheckout = async (session) => {
   //tour, user, price is available on this session coz on getCheckoutSession(look above) we specified client_reference_id
   //field and added tourId to that.
   const tour = session.client_reference_id
-  const user = User.findOne({ email: session.customer_email }).id
-  const price = session.line_items[0].amount / 100
+  const user = (await User.findOne({ email: session.customer_email })).id
+  const price = session.amount_total / 100
   await Booking.create({ tour, user, price })
 }
 
@@ -98,7 +107,7 @@ exports.webhookCheckout = (req, res, next) => {
   }
 
   //rem in our stripe dashboad, this is the type we defined there.
-  if (event.type === 'checkout.session.complete')
+  if (event.type === 'checkout.session.completed')
     createBookingCheckout(event.data.object)
 
   res.status(200).jsom({ recieved: true })
