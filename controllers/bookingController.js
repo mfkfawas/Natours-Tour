@@ -64,3 +64,9 @@ exports.createBookingCheckout = catchAsync(async (req, res, next) => {
   //here we remove the queryString inorder to not see the url by the user.
   res.redirect(req.originalUrl.split('?')[0])
 })
+
+exports.createBooking = factory.createOne(Booking)
+exports.getBooking = factory.getOne(Booking)
+exports.getAllBookings = factory.getAll(Booking)
+exports.updateBooking = factory.updateOne(Booking)
+exports.deleteBooking = factory.deleteOne(Booking)

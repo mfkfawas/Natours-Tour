@@ -45,10 +45,12 @@ exports.getMyTours = catchAsync(async (req, res, next) => {
   const bookings = await Booking.find({ user: req.user.id })
 
   // 2) Find Tours with returned IDs
-  const tourIDs = bookings.map((el) => el.tour) //el.tour itself is the tourID.
+  const tourIDs = bookings.map((el) => el.tour._id)
   //It will select all the tours which have an _id which is in the tourIDs array. Its great to know this handi in op,
   //Jonas want to fo this way for us to understand both manual and populate(we done bfr).
   const tours = await Tour.find({ _id: { $in: tourIDs } })
+
+  //Surely read the Q&A of chapter 215(Rendering a user's booked Tours)
 
   //we dont need new template for this coz we can reuse the 'overview' template.
   res.status(200).render('overview', {
