@@ -30,6 +30,18 @@ app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, 'views'))
 
 // 1) GLOBAL MIDDLEWARES
+//To understand more about this read 'Implementing CORS' in blue classmate notebook backside.
+app.use(cors())
+// Access-Control-Allow-Origin *
+// api.natours.com, front-end natours.com
+// app.use(cors({
+//   origin: 'https://www.natours.com'
+// }))
+
+//To understand more about this read 'Implementing CORS' in blue classmate notebook backside.
+app.options('*', cors())
+// app.options('/api/v1/tours/:id', cors());
+
 //Serving Static files
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -38,12 +50,12 @@ app.use(express.static(path.join(__dirname, 'public')))
 // to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin'
 // header is present on the requested resource. If an opaque response serves your needs, set
 // the request's mode to 'no-cors' to fetch the resource with CORS disabled.)
-const corsOptions = {
-  credentials: true, //access-control-allow-credentials:true
-  origin: 'http://localhost:3000',
-  optionSuccessStatus: 200,
-}
-app.use(cors(corsOptions)) // Use this after the variable declaration
+// const corsOptions = {
+//   credentials: true, //access-control-allow-credentials:true
+//   origin: 'http://localhost:3000',
+//   optionSuccessStatus: 200,
+// }
+// app.use(cors(corsOptions)) // Use this after the variable declaration
 
 //Set security HTTP headers
 app.use(helmet())
