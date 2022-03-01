@@ -22,6 +22,9 @@ const viewRouter = require('./routes/viewRoutes')
 
 const app = express()
 
+//To understand more about this read 'Testing for secure HTTPS connections' in blue classmate notebook backside.
+app.enable('trust proxy')
+
 //defining our view engine
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, 'views'))

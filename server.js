@@ -51,3 +51,13 @@ process.on('unhandledRejection', (err) => {
     process.exit(1)
   })
 })
+
+//To understand more about this read 'Responding to SIGTERM' signal in blue classmate notebook backside.
+process.on('SIGTERM', () => {
+  console.log('SIGTERM RECIEVED. Shutting down gracefully 🤢🤢🤢🤢🤢🤢')
+  //graceful shutdown
+  server.close(() => {
+    console.log('Process Terminated🤢🤢🤢🤢🤢🤢')
+    //here we donot use process.exit cz the SIGTERM itself cause the app to shutdown
+  })
+})

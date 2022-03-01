@@ -14,23 +14,22 @@ const signToken = function (id) {
   })
 }
 
-const createAndSendToken = (user, statusCode, res) => {
+const createAndSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id)
   // global.token = token
 
-  const cookieOptions = {
+  res.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
     sameSite: 'None',
-    secure: true,
-  }
-  console.log(token)
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true
+    //To understand more about this read 'Testing for secure HTTPS connections' in blue classmate notebook backside.
+    //req.headers['x-forwarded-proto'] === 'https' - this is heroku specific thing.
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+  })
 
-  res.cookie('jwt', token, cookieOptions)
-
+  // Remove password from o/p.
   user.password = undefined
 
   res.status(statusCode).json({
@@ -56,7 +55,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   await new Email(newUser, url).sendWelcome()
 
-  createAndSendToken(newUser, 201, res)
+  createAndSendToken(newUser, 201, req, res)
 })
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -75,7 +74,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect Email or Password', 401)) //401 -uanuthorized.
 
   // 3) If everything is OK, send token to the client.
-  createAndSendToken(user, 200, res)
+  createAndSendToken(user, 200, req, res)
 })
 
 // Chapter 192
@@ -288,7 +287,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   //we added userSchema.pre('save') middleware for 3rd step.
 
   // 4) Log the user in, send the JWT.
-  createAndSendToken(user, 200, res)
+  createAndSendToken(user, 200, req, res)
 })
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -306,5 +305,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   //User.findByIdAndUpdate will not work as intended.
 
   // 4) Log the user in, send the JWT.
-  createAndSendToken(user, 200, res)
+  createAndSendToken(user, 200, req, res)
 })
