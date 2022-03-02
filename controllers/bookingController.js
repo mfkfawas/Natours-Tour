@@ -14,9 +14,21 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 
   // 2) Create checkout session
 
+  const customer = await stripe.customers.create({
+    name: 'Jenny Rosen',
+    address: {
+      line1: '510 Townsend St',
+      postal_code: '98140',
+      city: 'San Francisco',
+      state: 'CA',
+      country: 'US',
+    },
+  })
+
   const session = await stripe.checkout.sessions.create({
     // INFORMATION ABOUT THE SESSION
     payment_method_types: ['card'],
+    metadata: customer,
 
     //url that will be callied as soon as a credit card has been succesfully charged.
     // success_url: `${req.protocol}://${req.get('host')}/?my-tours=${
