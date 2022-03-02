@@ -17,6 +17,8 @@ const router = express.Router()
 
 // router.use(fakeMiddleware)
 
+router.use(viewController.alerts)
+
 router.get(
   '/',
   // bookingController.createBookingCheckout,
