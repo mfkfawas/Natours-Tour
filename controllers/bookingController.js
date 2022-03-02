@@ -8,34 +8,32 @@ const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const factory = require('./handlerFactory')
 
+const customer = await stripe.customers.create({
+  name: 'Jenny Rosen',
+  address: {
+    line1: '510 Townsend St',
+    postal_code: '98140',
+    city: 'San Francisco',
+    state: 'CA',
+    country: 'US',
+  },
+})
+
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked tour
   const tour = await Tour.findById(req.params.tourId)
 
   // 2) Create checkout session
-
-  const customer = await stripe.customers.create({
-    name: 'Jenny Rosen',
-    address: {
-      line1: '510 Townsend St',
-      postal_code: '98140',
-      city: 'San Francisco',
-      state: 'CA',
-      country: 'US',
-    },
-  })
-
   const session = await stripe.checkout.sessions.create({
     // INFORMATION ABOUT THE SESSION
     payment_method_types: ['card'],
-    metadata: customer,
 
     //url that will be callied as soon as a credit card has been succesfully charged.
     // success_url: `${req.protocol}://${req.get('host')}/?my-tours=${
     //   req.params.tourId
     // }&user=${req.user.id}&price=${tour.price}`,
 
-    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
     //url tha will be called if user cancels the payment.
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
