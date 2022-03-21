@@ -77,7 +77,7 @@ userSchema.pre('save', async function (next) {
 
 //Update changePasswordAt property of the user
 userSchema.pre('save', async function (next) {
-  //this.isNew - if the document is new
+  //this.isNew - if the document is new - if the doc is new, no need of passwordChangedAt.
   if (!this.isModified('password') || this.isNew) return next()
 
   //(authController.js line 196 to 200)sometime saving to the DB is a bit slower than issuing the JSON web token, making it so that the changed

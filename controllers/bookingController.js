@@ -12,16 +12,6 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked tour
   const tour = await Tour.findById(req.params.tourId)
 
-  const customer = await stripe.customers.create({
-    name: 'Jenny Rosen',
-    address: {
-      line1: '510 Townsend St',
-      postal_code: '98140',
-      city: 'San Francisco',
-      state: 'CA',
-      country: 'US',
-    },
-  })
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     // INFORMATION ABOUT THE SESSION
