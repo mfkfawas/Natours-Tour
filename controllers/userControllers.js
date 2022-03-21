@@ -22,6 +22,8 @@ const factory = require('./handlerFactory')
 
 //Chapter 202
 //now image will be stored as buffer & not to disk. The buffer will be available at req.file.buffer
+//In computer science, a data buffer (or just buffer) is a region of a memory used to temporarily store
+//data while it is being moved from one place to another.
 const multerStorage = multer.memoryStorage()
 
 //Chapter 200

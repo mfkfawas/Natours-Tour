@@ -35,7 +35,7 @@ exports.uploadTourImages = upload.fields([
 
 //Chapter 204
 //if we have one only file to upload:
-// upload.single('field_name_of_DB')
+// upload.single('field_name_of_form')
 
 //Chapter 204
 exports.resizeTourImages = catchAsync(async (req, res, next) => {
