@@ -1,4 +1,4 @@
-//Its a good practice to have everything that is related to server in one file(main) and
+//Its a good practice to have everything that is related to server in one file(server.js) and
 //everything that related to express in another file(app.js).
 //This is the entry point. It is
 const mongoose = require('mongoose')
