@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 
 //This event-listener for sync code should be registered on top.
+// const x = y + 1  // y is not defined => will crash app
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION! 🤢🤢🤢. Shutting down!!!!')
   console.log(err.name, err.message)
@@ -38,6 +39,7 @@ const server = app.listen(port, () => {
 })
 
 //(Chapter 121)
+// This catches errors in Promises (async code) that you didn’t .catch().
 process.on('unhandledRejection', (err) => {
   console.log('UNHANDLED REJECTION! 🤢🤢🤢. Shutting down!!!!')
   console.log(err.name, err.message)
@@ -53,6 +55,7 @@ process.on('unhandledRejection', (err) => {
 })
 
 //To understand more about this read 'Responding to SIGTERM' signal in blue classmate notebook backside.
+// This listens for a signal from outside the app (like Heroku or Docker) telling the app to shut down.
 process.on('SIGTERM', () => {
   console.log('SIGTERM RECIEVED. Shutting down gracefully 🤢🤢🤢🤢🤢🤢')
   //graceful shutdown
