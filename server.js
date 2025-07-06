@@ -6,6 +6,22 @@ const dotenv = require('dotenv')
 
 //This event-listener for sync code should be registered on top.
 // const x = y + 1  // y is not defined => will crash app
+// uncaughtException is a last-resort safety net — it catches truly unhandled sync errors.
+// But in Express, it's best practice to use try-catch in middleware and pass errors to next(err), so you can respond nicely to the user.
+// Never rely on uncaughtException for error handling logic — just use it to log and shut down gracefully.
+
+// This will be caught by process.on('uncaughtException')
+// app.use((req, res, next) => {
+//   Sync error without try-catch
+//   const x = y + 1  // y is not defined
+// })
+
+// ✅ This will not trigger uncaughtException
+// ✅ Instead, it will go to your Express error-handling middleware:
+// app.use((err, req, res, next) => {
+//   res.status(500).send('Something broke!')   // we written this as last middleware in app.js
+// })
+
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION! 🤢🤢🤢. Shutting down!!!!')
   console.log(err.name, err.message)
